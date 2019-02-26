@@ -1,0 +1,9 @@
+name: "Yonghuihuo"
+output_dir: "."
+navbar:
+  title: "Yonghuihuo"
+left:
+  - text: "Home"
+    href: index.html
+  - text: "about"
+    href: package.html
