@@ -1,5 +1,5 @@
 ---
-title: "home"
+title: "Logit Website"
 ---
       
-Hello, Website! I love drawing.
+In this website, we will demonstrate how logitstic in R works, and hold example to show the logistic model.

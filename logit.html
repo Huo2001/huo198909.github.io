@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+
+<title>logistic regression</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Logit World</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="huo.html">package</a>
+</li>
+<li>
+  <a href="logit.html">logit model</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">logistic regression</h1>
+
+</div>
+
+
+<p>Exp:</p>
+<pre class="r"><code>head(iris)</code></pre>
+<pre><code>##   Sepal.Length Sepal.Width Petal.Length Petal.Width Species
+## 1          5.1         3.5          1.4         0.2  setosa
+## 2          4.9         3.0          1.4         0.2  setosa
+## 3          4.7         3.2          1.3         0.2  setosa
+## 4          4.6         3.1          1.5         0.2  setosa
+## 5          5.0         3.6          1.4         0.2  setosa
+## 6          5.4         3.9          1.7         0.4  setosa</code></pre>
+<pre class="r"><code>dim(iris)</code></pre>
+<pre><code>## [1] 150   5</code></pre>
+<pre class="r"><code>library(dplyr)
+library(ggplot2)
+library(tidyr)
+iris1 = iris %&gt;%
+  filter(
+    Species %in% c(&quot;versicolor&quot;,&quot;virginica&quot;)
+  )
+head(iris1)</code></pre>
+<pre><code>##   Sepal.Length Sepal.Width Petal.Length Petal.Width    Species
+## 1          7.0         3.2          4.7         1.4 versicolor
+## 2          6.4         3.2          4.5         1.5 versicolor
+## 3          6.9         3.1          4.9         1.5 versicolor
+## 4          5.5         2.3          4.0         1.3 versicolor
+## 5          6.5         2.8          4.6         1.5 versicolor
+## 6          5.7         2.8          4.5         1.3 versicolor</code></pre>
+<div id="logistic-model" class="section level3">
+<h3>logistic model</h3>
+<pre class="r"><code>modelfit=glm(Species ~ Petal.Width + Petal.Length, data=iris1, family = binomial(link=&quot;logit&quot;))</code></pre>
+</div>
+<div id="prediction-pred-value-should-between-0-and-1" class="section level3">
+<h3>prediction (pred value should between 0 and 1)</h3>
+<pre class="r"><code>a=iris1%&gt;%
+  mutate(pred=predict(object = modelfit, type = &quot;response&quot;), predsp=ifelse(pred&gt;0.5, &quot;virginica&quot;,&quot;versicolor&quot;))</code></pre>
+<pre class="r"><code>b=a%&gt;%
+  gather(key=sp, value=names, Species, predsp, na.rm=T)</code></pre>
+<pre><code>## Warning: attributes are not identical across measure variables;
+## they will be dropped</code></pre>
+<pre class="r"><code>p=b%&gt;%
+  ggplot(aes(Petal.Width, Petal.Length,
+               colour = names,
+               shape = names)) +
+  geom_point()+
+ facet_grid(sp~.)
+p</code></pre>
+<p><img src="logit_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p>When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the <em>Preview</em> button or press <em>Ctrl+Shift+K</em> to preview the HTML file).</p>
+<p>The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike <em>Knit</em>, <em>Preview</em> does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.</p>
+<p>Exp:</p>
+<pre class="r"><code>df &lt;- structure(list(y = c(2L, 7L, 776L, 19L, 12L, 26L, 7L, 12L, 8L,
+24L, 20L, 16L, 12L, 10L, 23L, 20L, 16L, 12L, 18L, 22L, 23L, 22L,
+13L, 7L, 20L, 12L, 13L, 11L, 11L, 14L, 10L, 8L, 10L, 11L, 5L,
+5L, 1L, 2L, 1L, 1L, 0L, 0L, 0L), n = c(3L, 7L, 789L, 20L, 14L,
+27L, 7L, 13L, 9L, 29L, 22L, 17L, 14L, 11L, 30L, 21L, 19L, 14L,
+22L, 29L, 28L, 28L, 19L, 10L, 27L, 22L, 18L, 18L, 14L, 23L, 18L,
+12L, 19L, 15L, 13L, 9L, 7L, 3L, 1L, 1L, 1L, 1L, 1L), x = c(18L,
+19L, 20L, 21L, 22L, 23L, 24L, 25L, 26L, 27L, 28L, 29L, 30L, 31L,
+32L, 33L, 34L, 35L, 36L, 37L, 38L, 39L, 40L, 41L, 42L, 43L, 44L,
+45L, 46L, 47L, 48L, 49L, 50L, 51L, 52L, 53L, 54L, 55L, 56L, 59L,
+62L, 63L, 66L)), .Names = c(&quot;y&quot;, &quot;n&quot;, &quot;x&quot;), class = &quot;data.frame&quot;, row.names = c(NA,
+-43L))
+
+
+mod.fit &lt;- glm(formula = y/n ~ x, data = df, weight=n, family = binomial(link = logit),
+        na.action = na.exclude, control = list(epsilon = 0.0001, maxit = 50, trace = T))</code></pre>
+<pre><code>## Deviance = 47.12782 Iterations - 1
+## Deviance = 44.52325 Iterations - 2
+## Deviance = 44.49945 Iterations - 3
+## Deviance = 44.49945 Iterations - 4</code></pre>
+<pre class="r"><code>summary(mod.fit)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = y/n ~ x, family = binomial(link = logit), data = df, 
+##     weights = n, na.action = na.exclude, control = list(epsilon = 1e-04, 
+##         maxit = 50, trace = T))
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -2.0373  -0.6449  -0.1424   0.5004   2.2758  
+## 
+## Coefficients:
+##              Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)  5.812080   0.326245   17.82   &lt;2e-16 ***
+## x           -0.115027   0.008338  -13.79   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 282.181  on 42  degrees of freedom
+## Residual deviance:  44.499  on 41  degrees of freedom
+## AIC: 148.46
+## 
+## Number of Fisher Scoring iterations: 4</code></pre>
+<pre class="r"><code>Pi &lt;- c(0.25, 0.5, 0.75)
+LD &lt;- (log(Pi /(1-Pi))-mod.fit$coefficients[1])/mod.fit$coefficients[2]
+LD.summary &lt;- data.frame(Pi , LD)
+LD.summary</code></pre>
+<pre><code>##     Pi       LD
+## 1 0.25 60.07905
+## 2 0.50 50.52811
+## 3 0.75 40.97717</code></pre>
+<pre class="r"><code>#### method1
+lin.pred &lt;- predict(mod.fit)
+pi.hat &lt;- exp(lin.pred)/(1 + exp(lin.pred))
+
+e=plot(df$x, df$y/df$n, xlab = &quot;x&quot;, ylab = &quot;Estimated probability&quot;)
+e=lines(df$x, pi.hat, lty = 1, col = &quot;red&quot;)
+e</code></pre>
+<pre><code>## NULL</code></pre>
+<pre class="r"><code>segments(x0 = LD.summary$LD, y0 = -0.1, x1 = LD.summary$LD, y1 = LD.summary$Pi,
+         lty=2, col=c(&quot;darkblue&quot;,&quot;darkred&quot;,&quot;darkgreen&quot;))
+segments(x0 = 15, y0 = LD.summary$Pi, x1 = LD.summary$LD, y1 = LD.summary$Pi,
+         lty=2, col=c(&quot;darkblue&quot;,&quot;darkred&quot;,&quot;darkgreen&quot;))
+legend(&quot;bottomleft&quot;, legend=c(&quot;LD25&quot;, &quot;LD50&quot;, &quot;LD75&quot;), lty=2, col=c(&quot;darkblue&quot;,&quot;darkred&quot;,&quot;darkgreen&quot;), bty=&quot;n&quot;, cex=0.75)</code></pre>
+<p><img src="logit_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<pre class="r"><code>## or
+library(ggplot2)
+library(tidyverse)
+df$pred &lt;- pi.hat
+LD.summary$group &lt;- c(&#39;LD25&#39;,&#39;LD50&#39;,&#39;LD75&#39;)
+
+ggplot(df,aes(x = x, y = y/n)) + 
+    geom_point() + 
+    geom_line(aes(y = pred),colour = &quot;black&quot;) + 
+    geom_segment(data=LD.summary, aes(y = Pi,
+                                      xend = LD,
+                                      yend = Pi,
+                                      col = group),x = -Inf,linetype = &quot;dashed&quot;) + 
+    geom_segment(data=LD.summary,aes(x = LD,
+                                     xend = LD,
+                                     yend = Pi,
+                                     col = group),y = -Inf,linetype = &quot;dashed&quot;)</code></pre>
+<p><img src="logit_files/figure-html/unnamed-chunk-7-2.png" width="672" /></p>
+<pre class="r"><code>p</code></pre>
+<p><img src="logit_files/figure-html/unnamed-chunk-7-3.png" width="672" /></p>
+<pre class="r"><code>## or
+
+p&lt;- df%&gt;%
+  ggplot(aes())
+
+p &lt;- ggplot(data = df, aes(x = x, y = y/n)) +
+            geom_point() +
+            stat_smooth(method = &quot;glm&quot;, family = &quot;binomial&quot;)</code></pre>
+<pre><code>## Warning: Ignoring unknown parameters: family</code></pre>
+<pre class="r"><code>p &lt;- p + geom_segment(aes(
+                            x = LD.summary$LD
+                          , y = 0
+                          , xend = LD.summary$LD
+                          , yend = LD.summary$Pi
+                         )
+                         , colour=&quot;red&quot;
+                       )
+
+p &lt;- p + geom_segment(aes(
+                            x = 0
+                          , y = LD.summary$Pi
+                          , xend = LD.summary$LD
+                          , yend = LD.summary$Pi
+                         )
+                         , colour=&quot;red&quot;
+                       )</code></pre>
+<div id="inf--inf" class="section level4">
+<h4>?????? Inf ??? -Inf ???????????????????????????????????????</h4>
+<p>?????????????????????????????????????????????,????????????????????????????????????????????????,?????? geom_smooth???????????????????????????????????????,????????????????????? ggplot ???????????????</p>
+</div>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

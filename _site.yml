@@ -1,9 +1,11 @@
-name: "Yonghuihuo"
+name: "my-website"
 output_dir: "."
 navbar:
-  title: "Yonghuihuo"
-left:
-  - text: "Home"
-    href: index.html
-  - text: "about"
-    href: package.html
+  title: "Logit World"
+  left:
+    - text: "Home"
+      href: index.html
+    - text: "package"
+      href: huo.html
+    - text: "logit model"
+      href: logit.html
